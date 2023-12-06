@@ -1,8 +1,8 @@
-const { Schema, model } = require('mongoose');
-const bcrypt = require('bcrypt');
+import { Schema, model } from 'mongoose';
+import bcrypt from 'bcrypt';
 
 // import schema from Book.js
-const bookSchema = require('./Book');
+import bookSchema from './Book';
 
 const userSchema = new Schema(
   {
@@ -34,17 +34,27 @@ const userSchema = new Schema(
 
 // hash user password
 userSchema.pre('save', async function (next) {
-  if (this.isNew || this.isModified('password')) {
-    const saltRounds = 10;
-    this.password = await bcrypt.hash(this.password, saltRounds);
-  }
+  try {
+    if (this.isNew || this.isModified('password')) {
+      const saltRounds = 10;
+      this.password = await bcrypt.hash(this.password, saltRounds);
+    }
 
-  next();
+    next();
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    next(error);
+  }
 });
 
 // custom method to compare and validate password for logging in
 userSchema.methods.isCorrectPassword = async function (password) {
-  return bcrypt.compare(password, this.password);
+  try {
+    return await bcrypt.compare(password, this.password);
+  } catch (error) {
+    console.error('Error comparing passwords:', error);
+    return false;
+  }
 };
 
 // when we query a user, we'll also get another field called `bookCount` with the number of saved books we have
@@ -54,4 +64,4 @@ userSchema.virtual('bookCount').get(function () {
 
 const User = model('User', userSchema);
 
-module.exports = User;
+export default User;

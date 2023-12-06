@@ -1,7 +1,7 @@
-const express = require('express');
-const path = require('path');
-const db = require('./config/connection');
-const routes = require('./routes');
+import express from 'express';
+import path from 'path';
+import { connect } from './config/connection';
+import routes from './routes';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,6 +16,6 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use(routes);
 
-db.once('open', () => {
+connect.once('open', () => {
   app.listen(PORT, () => console.log(`🌍 Now listening on localhost:${PORT}`));
 });
